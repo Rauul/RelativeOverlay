@@ -978,7 +978,9 @@ namespace RelativeOverlay
 
     private void exitToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      Application.Exit();
+            this.config.Write("posX", this.Location.X.ToString());
+            this.config.Write("posY", this.Location.Y.ToString());
+            Application.Exit();
     }
   }
 }
