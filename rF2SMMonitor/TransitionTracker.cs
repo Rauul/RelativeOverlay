@@ -1,7 +1,7 @@
 ﻿/*
 TransitionTracker class various state transitions in rF2 state and optionally logs transitions to files.
 
-Author: The Iron Wolf (vleonavicius@hotmail.com)
+Author: The Iron Wolf  (vleonavicius@hotmail.com)
 Website: thecrewchief.org
 */
 using rF2SMMonitor.rFactor2Data;
