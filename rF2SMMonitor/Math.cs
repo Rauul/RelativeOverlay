@@ -4,12 +4,12 @@ Implementation of MathHelper and related classes.
 Author: The Iron Wolf (vleonavicius@hotmail.com)
 Website: thecrewchief.org
 */
-using rF2SMMonitor.rFactor2Data;
+using RelativeOverlay.rFactor2Data;
 using System;
 using System.Diagnostics;
-using static rF2SMMonitor.rFactor2Constants;
+using static RelativeOverlay.rFactor2Constants;
 
-namespace rF2SMMonitor
+namespace RelativeOverlay
 {
   static internal class MathHelper
   {

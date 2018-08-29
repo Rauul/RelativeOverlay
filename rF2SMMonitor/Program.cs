@@ -1,5 +1,5 @@
 ﻿/*
-rF2SMMonitor entry point.
+RelativeOverlay entry point.
 
 Author: The Iron Wolf (vleonavicius@hotmail.com)
 Website: thecrewchief.org
@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace rF2SMMonitor
+namespace RelativeOverlay
 {
     static class Program
     {

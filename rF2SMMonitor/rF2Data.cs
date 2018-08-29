@@ -10,7 +10,7 @@ Website: thecrewchief.org
 using System;
 using System.Runtime.InteropServices;
 
-namespace rF2SMMonitor
+namespace RelativeOverlay
 {
   // Marshalled types:
   // C++                 C#

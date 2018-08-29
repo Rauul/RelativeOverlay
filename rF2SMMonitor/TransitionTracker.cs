@@ -4,13 +4,13 @@ TransitionTracker class various state transitions in rF2 state and optionally lo
 Author: The Iron Wolf  (vleonavicius@hotmail.com)
 Website: thecrewchief.org
 */
-using rF2SMMonitor.rFactor2Data;
+using RelativeOverlay.rFactor2Data;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace rF2SMMonitor
+namespace RelativeOverlay
 {
   internal class TransitionTracker
   {

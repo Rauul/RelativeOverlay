@@ -12,7 +12,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace rF2SMMonitor
+namespace RelativeOverlay
 {
   class IniFile   // revision 11
   {
