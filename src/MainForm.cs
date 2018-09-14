@@ -892,7 +892,7 @@ namespace RelativeOverlay
       {
         Disconnect();
       }
-    }
+    } 
 
     private void Disconnect()
     {
