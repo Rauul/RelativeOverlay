@@ -140,6 +140,7 @@ namespace RelativeOverlay
                 o.currLapDistance = veh.mLapDist;
                 o.totalLapDistance = veh.mTotalLaps + (veh.mLapDist / scoring.mScoringInfo.mLapDist);
                 o.vehicleName = TransitionTracker.GetStringFromBytes(veh.mVehicleName);
+                if (o.vehicleName == "#173") o.vehicleName = "#173 MRS-Simracing";
                 o.vehicleClass = TransitionTracker.GetStringFromBytes(veh.mVehicleClass);
 
                 o.timeIntoLap = veh.mTimeIntoLap;
@@ -299,10 +300,10 @@ namespace RelativeOverlay
             var PlayerOnTrackBrush = new SolidBrush(Color.FromArgb(215, 160, 30));
             var EqualCarInPitsBrush = new SolidBrush(Color.FromArgb(128, 128, 128));
             var EqualCarOnTrackBrush = new SolidBrush(Color.FromArgb(230, 230, 230));
-            var FasterCarInPitsBrush = new SolidBrush(Color.FromArgb(150, 60, 60));
-            var FasterCarOnTrackBrush = new SolidBrush(Color.FromArgb(220, 85, 85));
-            var SlowerCarInPitsBrush = new SolidBrush(Color.FromArgb(30, 85, 130));
-            var SlowerCarOnTrackBrush = new SolidBrush(Color.FromArgb(45, 135, 205));
+            var FasterCarInPitsBrush = new SolidBrush(Color.FromArgb(179, 59, 59));
+            var FasterCarOnTrackBrush = new SolidBrush(Color.FromArgb(230, 79, 79));
+            var SlowerCarInPitsBrush = new SolidBrush(Color.FromArgb(59, 137, 179));
+            var SlowerCarOnTrackBrush = new SolidBrush(Color.FromArgb(75, 175, 230));
             var session = scoring.mScoringInfo.mSession;
 
             Brush TextColor(int other, int player)
@@ -395,7 +396,7 @@ namespace RelativeOverlay
                 var point = new Point(25, 5);
                 var rAlinged = new StringFormat() { Alignment = StringAlignment.Far };
                 var lAlinged = new StringFormat() { Alignment = StringAlignment.Near };
-                var font = new Font("Verdana", 10, FontStyle.Bold);
+                var font = new Font("Ubuntu Mono", 13, FontStyle.Bold);
 
                 int i = 0;
                 foreach (var o in opponentInfos)
@@ -403,7 +404,7 @@ namespace RelativeOverlay
                     var brush = TextColor(i, playerSlot);
                     g.DrawString(o.position.ToString(), font, brush, point, rAlinged);
                     point.X += 5;
-                    g.FillRectangle(Classcolor(i), point.X, point.Y, 25, 18);
+                    g.FillRectangle(Classcolor(i), point.X, point.Y+1, 25, 18);
                     point.X += 25;
                     g.DrawString(o.positionInClass.ToString(), font, Brushes.Black, point, rAlinged);
                     point.X += 5;
