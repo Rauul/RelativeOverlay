@@ -35,7 +35,7 @@ namespace RelativeOverlay
             this.view.Dock = System.Windows.Forms.DockStyle.Fill;
             this.view.Location = new System.Drawing.Point(0, 0);
             this.view.Name = "view";
-            this.view.Size = new System.Drawing.Size(365, 150);
+            this.view.Size = new System.Drawing.Size(400, 150);
             this.view.TabIndex = 0;
             this.view.TabStop = false;
             this.view.MouseDown += new System.Windows.Forms.MouseEventHandler(this.view_MouseDown);
@@ -50,7 +50,7 @@ namespace RelativeOverlay
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -59,7 +59,7 @@ namespace RelativeOverlay
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(365, 150);
+            this.ClientSize = new System.Drawing.Size(400, 150);
             this.Controls.Add(this.view);
             this.ForeColor = System.Drawing.Color.White;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
