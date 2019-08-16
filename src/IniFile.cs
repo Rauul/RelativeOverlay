@@ -12,7 +12,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace RelativeOverlay
+namespace FuelOverlay
 {
   class IniFile   // revision 11
   {

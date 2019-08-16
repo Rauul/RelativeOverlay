@@ -1,5 +1,5 @@
 ﻿/*
-RelativeOverlay entry point.
+FuelOverlay entry point.
 
 Author: The Iron Wolf (vleonavicius@hotmail.com)
 Website: thecrewchief.org
@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace RelativeOverlay
+namespace FuelOverlay
 {
     static class Program
     {

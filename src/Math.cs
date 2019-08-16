@@ -4,12 +4,12 @@ Implementation of MathHelper and related classes.
 Author: The Iron Wolf (vleonavicius@hotmail.com)
 Website: thecrewchief.org
 */
-using RelativeOverlay.rFactor2Data;
+using FuelOverlay.rFactor2Data;
 using System;
 using System.Diagnostics;
-using static RelativeOverlay.rFactor2Constants;
+using static FuelOverlay.rFactor2Constants;
 
-namespace RelativeOverlay
+namespace FuelOverlay
 {
   static internal class MathHelper
   {

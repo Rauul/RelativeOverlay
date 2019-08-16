@@ -1,12 +1,12 @@
 ﻿/*
-RelativeOverlay is visual debugger for rF2 Shared Memory Plugin.
+FuelOverlay is visual debugger for rF2 Shared Memory Plugin.
 
 MainForm implementation, contains main loop and render calls.
 
 Author: The Iron Wolf (vleonavicius@hotmail.com)
 Website: thecrewchief.org
 */
-using RelativeOverlay.rFactor2Data;
+using FuelOverlay.rFactor2Data;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,17 +17,31 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using static RelativeOverlay.rFactor2Constants;
+using static FuelOverlay.rFactor2Constants;
 
-namespace RelativeOverlay
+namespace FuelOverlay
 {
     public partial class MainForm : Form
     {
+        double fuelCapacity = 0.00;
+        double quantity = 0.00;
+        double quantityLastLap = 0.00;
+        double[] usedPerLap = new double[3] { 0, 0, 0 };
+        double bestLapLastSession = 0;
+        double lastLapStartET = 0.00;
+        double lapQuantity = 0.00;
+        double fuelNeededToFinish = 0.00;
+        int timeQuantityTotal = 0;
+        int timeQuantityMinutes = 0;
+        int timeQuantitySeconds = 0;
+        int fullTanksNeeded = 0;
+        bool firstUpdate = true;
+
         // Connection fields
         private const int CONNECTION_RETRY_INTERVAL_MS = 1000;
         private const int DISCONNECTED_CHECK_INTERVAL_MS = 15000;
         private const float DEGREES_IN_RADIAN = 57.2957795f;
-        private const int LIGHT_MODE_REFRESH_MS = 200;
+        private const int LIGHT_MODE_REFRESH_MS = 33;
 
         System.Windows.Forms.Timer connectTimer = new System.Windows.Forms.Timer();
         System.Windows.Forms.Timer disconnectTimer = new System.Windows.Forms.Timer();
@@ -343,7 +357,7 @@ namespace RelativeOverlay
 
             this.DoubleBuffered = true;
             this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(Screen.PrimaryScreen.Bounds.Width / 2 - 1330, Screen.PrimaryScreen.Bounds.Height / 2 + 385);
+            //this.Location = new Point(Screen.PrimaryScreen.Bounds.Width / 2 - 1330, Screen.PrimaryScreen.Bounds.Height / 2 + 385);
 
             this.LoadConfig();
             this.connectTimer.Interval = CONNECTION_RETRY_INTERVAL_MS;
@@ -353,17 +367,9 @@ namespace RelativeOverlay
             this.connectTimer.Start();
             this.disconnectTimer.Start();
 
-            this.view.Paint += View_Paint;
-
             this.TopMost = true;
 
             Application.Idle += HandleApplicationIdle;
-        }
-
-        private void TextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-                this.view.Focus();
         }
 
         protected override void Dispose(bool disposing)
@@ -403,7 +409,6 @@ namespace RelativeOverlay
                         this.MainRender();
                     }
 
-                    //if (this.logLightMode)
                     Thread.Sleep(LIGHT_MODE_REFRESH_MS);
                 }
                 catch (Exception)
@@ -449,10 +454,140 @@ namespace RelativeOverlay
             }
         }
 
+        int getPlayerSlot()
+        {
+            for (int i = 0; i < scoring.mScoringInfo.mNumVehicles; i++)
+            {
+                if (scoring.mVehicles[i].mIsPlayer == 1)
+                    return i;
+            }
+            return -1;
+        }
+
+        bool NewLapStarted()
+        {
+            if (telemetry.mVehicles[getPlayerSlot()].mLapStartET != lastLapStartET)
+                return true;
+
+            return false;
+        }
+
+
+
+
+
+
         void MainRender()
         {
-            this.view.Refresh();
+            if (scoring.mScoringInfo.mInRealtime == 0)
+            {
+                firstUpdate = true;
+                return;
+            }
+            // Telemetry
+            int playerSlot = getPlayerSlot();
+
+            var info = telemetry.mVehicles[playerSlot];
+
+            double quantity = info.mFuel;
+            double capacity = info.mFuelCapacity;
+
+            if (firstUpdate)
+            {
+                quantityLastLap = quantity;
+                firstUpdate = false;
+            }
+
+            if (NewLapStarted())
+            {
+                if (quantityLastLap - quantity > info.mFuelCapacity * 0.01)
+                {
+                    for (int i = 2; i > 0; i--)
+                    {
+                        usedPerLap[i] = usedPerLap[i - 1];
+                    }
+                    usedPerLap[0] = quantityLastLap - quantity;
+                }
+
+                quantityLastLap = quantity;
+                lastLapStartET = info.mLapStartET;
+            }
+
+            int laps = 0;
+            double total = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                if (usedPerLap[i] > 0)
+                {
+                    total += usedPerLap[i];
+                    laps++;
+                }
+                else
+                    break;
+            }
+
+            // Laps
+            if (laps > 0)
+            {
+                double avgFuelConsumption = total / laps;
+                lapQuantity = quantity / avgFuelConsumption;
+            }
+
+            // Scoring
+            if (NewLapStarted())
+            {
+                if ((scoring.mVehicles[playerSlot].mBestLapTime < bestLapLastSession && scoring.mVehicles[playerSlot].mBestLapTime > 0) || bestLapLastSession < 1)
+                    bestLapLastSession = scoring.mVehicles[playerSlot].mBestLapTime;
+            }
+
+            // Calculate time
+            if (laps > 0 && (scoring.mVehicles[playerSlot].mBestLapTime > 0 || bestLapLastSession > 0))
+            {
+                double avgFuelConsumption = total / laps;
+
+                if (scoring.mVehicles[playerSlot].mBestLapTime > 0)
+                    timeQuantityTotal = (int)(quantity / (avgFuelConsumption / scoring.mVehicles[playerSlot].mBestLapTime));
+                else
+                    timeQuantityTotal = (int)(quantity / (avgFuelConsumption / bestLapLastSession));
+            }
+
+            timeQuantityMinutes = timeQuantityTotal / 60;
+            timeQuantitySeconds = timeQuantityTotal % 60;
+
+            //Calculate fuel needed to finish
+            if (laps > 0 && (scoring.mVehicles[playerSlot].mBestLapTime > 0 || bestLapLastSession > 0))
+            {
+                double avgFuelConsumption = total / laps;
+
+                if (scoring.mScoringInfo.mMaxLaps > 999999)
+                    if (scoring.mVehicles[playerSlot].mBestLapTime > 0)
+                        fuelNeededToFinish = (avgFuelConsumption / scoring.mVehicles[playerSlot].mBestLapTime * (scoring.mScoringInfo.mEndET - scoring.mScoringInfo.mCurrentET)) - quantity + avgFuelConsumption;
+                    else
+                        fuelNeededToFinish = (avgFuelConsumption / bestLapLastSession * (scoring.mScoringInfo.mEndET - scoring.mScoringInfo.mCurrentET)) - quantity + avgFuelConsumption;
+                else
+                    fuelNeededToFinish = (scoring.mScoringInfo.mMaxLaps - (scoring.mVehicles[playerSlot].mTotalLaps + (scoring.mVehicles[playerSlot].mLapDist / scoring.mScoringInfo.mLapDist))) * avgFuelConsumption - quantity;
+
+            }
+
+            fullTanksNeeded = (int)(fuelNeededToFinish / capacity);
+            fuelNeededToFinish = fuelNeededToFinish % capacity;
+
+
+            // Show the results
+            fuelLabel.Text = quantity.ToString("0.00");
+            lastLapLabel.Text = usedPerLap[0].ToString("0.00");
+            lapsLabel.Text = lapQuantity.ToString("0.00");
+            timeLabel.Text = timeQuantityMinutes.ToString() + ":" + timeQuantitySeconds.ToString("00");
+            if (fullTanksNeeded <= 0)
+                refuelLabel.Text = "" + Math.Ceiling(fuelNeededToFinish);
+            else
+                refuelLabel.Text = "(" + fullTanksNeeded + ") " + Math.Ceiling(fuelNeededToFinish);
         }
+
+
+
+
+
 
         int framesAvg = 20;
         int frame = 0;
@@ -828,33 +963,33 @@ namespace RelativeOverlay
       new PointF(arrowSide / 2.0f, -arrowSide / 2.0f)
     };
 
-        private void RenderOrientationAxis(Graphics g)
-        {
+        //private void RenderOrientationAxis(Graphics g)
+        //{
 
-            float length = 1000.0f;
-            float arrowDistX = this.view.Width / 2.0f - 10.0f;
-            float arrowDistY = this.view.Height / 2.0f - 10.0f;
+        //    float length = 1000.0f;
+        //    float arrowDistX = this.view.Width / 2.0f - 10.0f;
+        //    float arrowDistY = this.view.Height / 2.0f - 10.0f;
 
-            // X (x screen) axis
-            g.DrawLine(Pens.Red, -length, 0.0f, length, 0.0f);
-            var state = g.Save();
-            g.TranslateTransform(this.rotateAroundVehicle ? arrowDistY : arrowDistX, 0.0f);
-            g.RotateTransform(-90.0f);
-            g.FillPolygon(Brushes.Red, this.arrowHead);
-            g.RotateTransform(90.0f);
-            //g.DrawString("x+", SystemFonts.DefaultFont, Brushes.Red, -10.0f, 10.0f);
-            g.Restore(state);
+        //    // X (x screen) axis
+        //    g.DrawLine(Pens.Red, -length, 0.0f, length, 0.0f);
+        //    var state = g.Save();
+        //    g.TranslateTransform(this.rotateAroundVehicle ? arrowDistY : arrowDistX, 0.0f);
+        //    g.RotateTransform(-90.0f);
+        //    g.FillPolygon(Brushes.Red, this.arrowHead);
+        //    g.RotateTransform(90.0f);
+        //    //g.DrawString("x+", SystemFonts.DefaultFont, Brushes.Red, -10.0f, 10.0f);
+        //    g.Restore(state);
 
-            state = g.Save();
-            // Z (y screen) axis
-            g.DrawLine(Pens.Blue, 0.0f, -length, 0.0f, length);
-            g.TranslateTransform(0.0f, -arrowDistY);
-            g.RotateTransform(180.0f);
-            g.FillPolygon(Brushes.Blue, this.arrowHead);
-            //g.DrawString("z+", SystemFonts.DefaultFont, Brushes.Blue, 10.0f, -10.0f);
+        //    state = g.Save();
+        //    // Z (y screen) axis
+        //    g.DrawLine(Pens.Blue, 0.0f, -length, 0.0f, length);
+        //    g.TranslateTransform(0.0f, -arrowDistY);
+        //    g.RotateTransform(180.0f);
+        //    g.FillPolygon(Brushes.Blue, this.arrowHead);
+        //    //g.DrawString("z+", SystemFonts.DefaultFont, Brushes.Blue, 10.0f, -10.0f);
 
-            g.Restore(state);
-        }
+        //    g.Restore(state);
+        //}
 
         private void ConnectTimer_Tick(object sender, EventArgs e)
         {
@@ -884,7 +1019,7 @@ namespace RelativeOverlay
             try
             {
                 // Alternatively, I could release resources and try re-acquiring them immidiately.
-                var processes = Process.GetProcessesByName(RelativeOverlay.rFactor2Constants.RFACTOR2_PROCESS_NAME);
+                var processes = Process.GetProcessesByName(FuelOverlay.rFactor2Constants.RFACTOR2_PROCESS_NAME);
                 if (processes.Length == 0)
                     Disconnect();
             }
@@ -956,7 +1091,7 @@ namespace RelativeOverlay
                 TransitionTracker.useTeamName = intResult != 0;
 
             intResult = 0;
-                        MainForm.useStockCarRulesPlugin = false;
+            MainForm.useStockCarRulesPlugin = false;
             // Disable this option for now, it might come in handy down the line.
             //if (int.TryParse(this.config.Read("useStockCarRules"), out intResult) && intResult == 1)
             // MainForm.useStockCarRulesPlugin = true;
@@ -978,6 +1113,11 @@ namespace RelativeOverlay
             {
                 ReleaseCapture();
                 SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+
+            if (e.Button == MouseButtons.Right)
+            {
+                contextMenuStrip1.Show(this, new Point(0, 0));
             }
         }
 

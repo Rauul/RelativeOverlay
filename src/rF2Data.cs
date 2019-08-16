@@ -10,7 +10,7 @@ Website: thecrewchief.org
 using System;
 using System.Runtime.InteropServices;
 
-namespace RelativeOverlay
+namespace FuelOverlay
 {
   // Marshalled types:
   // C++                 C#
