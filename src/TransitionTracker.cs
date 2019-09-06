@@ -93,6 +93,7 @@ namespace RelativeOverlay
         internal void TrackTimings(ref rF2Scoring scoring, ref rF2Telemetry telemetry, ref rF2Rules rules, ref rF2Extended extended, Graphics g, bool logToFile)
         {
             int playerSlot = -1;
+            int GTRs = 0;
             int LMP1s = 0;
             int LMP2s = 0;
             int LMP3s = 0;
@@ -163,6 +164,14 @@ namespace RelativeOverlay
             {
                 switch (opponentInfos[i].vehicleClass)
                 {
+                    case "Senna GTR":
+                        GTRs++;
+                        opponentInfos[i].positionInClass = GTRs;
+                        break;
+                    case "Hypercar":
+                        GTRs++;
+                        opponentInfos[i].positionInClass = GTRs;
+                        break;
                     case "LMP1":
                         LMP1s++;
                         opponentInfos[i].positionInClass = LMP1s;
@@ -364,6 +373,12 @@ namespace RelativeOverlay
 
             Brush Classcolor(int i)
             {
+                if (opponentInfos[i].vehicleClass == "Hypercar")
+                    return new SolidBrush(Color.FromArgb(210, 40, 40));
+
+                if (opponentInfos[i].vehicleClass == "Senna GTR")
+                    return new SolidBrush(Color.FromArgb(210, 40, 40));
+
                 if (opponentInfos[i].vehicleClass == "LMP1")
                     return new SolidBrush(Color.FromArgb(210, 40, 40));
 
