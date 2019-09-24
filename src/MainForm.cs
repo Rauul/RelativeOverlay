@@ -489,8 +489,8 @@ namespace FuelOverlay
 
             var info = telemetry.mVehicles[playerSlot];
 
-            double quantity = info.mFuel;
-            double capacity = info.mFuelCapacity;
+            quantity = info.mFuel;
+            fuelCapacity = info.mFuelCapacity;
 
             if (firstUpdate)
             {
@@ -569,8 +569,8 @@ namespace FuelOverlay
 
             }
 
-            fullTanksNeeded = (int)(fuelNeededToFinish / capacity);
-            fuelNeededToFinish = fuelNeededToFinish % capacity;
+            fullTanksNeeded = (int)(fuelNeededToFinish / fuelCapacity);
+            fuelNeededToFinish = fuelNeededToFinish % fuelCapacity;
 
 
             // Show the results
