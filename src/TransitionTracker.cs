@@ -164,10 +164,8 @@ namespace RelativeOverlay
             {
                 switch (opponentInfos[i].vehicleClass)
                 {
+                    case "LMHC":
                     case "Senna GTR":
-                        GTRs++;
-                        opponentInfos[i].positionInClass = GTRs;
-                        break;
                     case "Hypercar":
                         GTRs++;
                         opponentInfos[i].positionInClass = GTRs;
@@ -373,14 +371,13 @@ namespace RelativeOverlay
 
             Brush Classcolor(int i)
             {
-                if (opponentInfos[i].vehicleClass == "Hypercar")
-                    return new SolidBrush(Color.FromArgb(210, 40, 40));
-
-                if (opponentInfos[i].vehicleClass == "Senna GTR")
-                    return new SolidBrush(Color.FromArgb(210, 40, 40));
+                if (opponentInfos[i].vehicleClass == "LMHC" ||
+                    opponentInfos[i].vehicleClass == "Hypercar" ||
+                    opponentInfos[i].vehicleClass == "Senna GTR")
+                    return new SolidBrush(Color.FromArgb(220, 60, 60));
 
                 if (opponentInfos[i].vehicleClass == "LMP1")
-                    return new SolidBrush(Color.FromArgb(210, 40, 40));
+                    return new SolidBrush(Color.FromArgb(220, 60, 60));
 
                 if (opponentInfos[i].vehicleClass == "LMP2")
                     return new SolidBrush(Color.FromArgb(45, 140, 230));
@@ -392,10 +389,10 @@ namespace RelativeOverlay
                     return new SolidBrush(Color.FromArgb(35, 180, 75));
 
                 if (opponentInfos[i].vehicleClass == "GT3")
-                    return new SolidBrush(Color.FromArgb(255, 190, 110));
+                    return new SolidBrush(Color.FromArgb(208, 103, 28));
 
-                return new SolidBrush(Color.FromArgb(208, 103, 28));
-            }
+                return new SolidBrush(Color.FromArgb(255, 190, 110));
+        }
 
             if (g != null)
             {
