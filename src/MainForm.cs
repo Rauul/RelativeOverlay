@@ -36,6 +36,7 @@ namespace FuelOverlay
         int timeQuantitySeconds = 0;
         int fullTanksNeeded = 0;
         bool firstUpdate = true;
+        bool hidden = false;
 
         // Connection fields
         private const int CONNECTION_RETRY_INTERVAL_MS = 1000;
@@ -421,8 +422,27 @@ namespace FuelOverlay
         long delayAccMicroseconds = 0;
         long numDelayUpdates = 0;
         float avgDelayMicroseconds = 0.0f;
+
         void MainUpdate()
         {
+            if (scoring.mScoringInfo.mInRealtime == 0 && !hidden)
+            {
+                this.Location = new Point(this.Location.X, this.Location.Y - 10000);
+                hidden = true;
+
+                return;
+            }
+            else if (scoring.mScoringInfo.mInRealtime == 1 && hidden)
+            {
+                this.Location = new Point(this.Location.X, this.Location.Y + 10000);
+                hidden = false;
+            }
+
+            if (scoring.mScoringInfo.mInRealtime == 0)
+            {
+                firstUpdate = true;
+            }
+
             if (!this.connected)
                 return;
 
@@ -479,11 +499,6 @@ namespace FuelOverlay
 
         void MainRender()
         {
-            if (scoring.mScoringInfo.mInRealtime == 0)
-            {
-                firstUpdate = true;
-                return;
-            }
             // Telemetry
             int playerSlot = getPlayerSlot();
 
