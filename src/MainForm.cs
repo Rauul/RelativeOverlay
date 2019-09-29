@@ -32,6 +32,7 @@ namespace RelativeOverlay
         System.Windows.Forms.Timer connectTimer = new System.Windows.Forms.Timer();
         System.Windows.Forms.Timer disconnectTimer = new System.Windows.Forms.Timer();
         bool connected = false;
+        bool hidden = false;
 
         private class MappedBuffer<MappedBufferT>
         {
@@ -416,10 +417,26 @@ namespace RelativeOverlay
         long delayAccMicroseconds = 0;
         long numDelayUpdates = 0;
         float avgDelayMicroseconds = 0.0f;
+
         void MainUpdate()
         {
-            if (!this.connected)
+            if (scoring.mScoringInfo.mInRealtime == 0 && !hidden)
+            {
+                this.Location = new Point(this.Location.X, this.Location.Y - 10000);
+                hidden = true;
+
                 return;
+            }
+            else if (scoring.mScoringInfo.mInRealtime == 1 && hidden)
+            {
+                this.Location = new Point(this.Location.X, this.Location.Y + 10000);
+                hidden = false;
+            }
+
+            if (!this.connected)
+            {
+                return;
+            }
 
             try
             {
@@ -458,6 +475,7 @@ namespace RelativeOverlay
         int frame = 0;
         int fps = 0;
         Stopwatch fpsStopWatch = new Stopwatch();
+
         private void UpdateFPS()
         {
             if (this.frame > this.framesAvg)
@@ -826,7 +844,7 @@ namespace RelativeOverlay
       new PointF(-arrowSide / 2.0f, -arrowSide / 2.0f),
       new PointF(0.0f, arrowSide / 2.0f),
       new PointF(arrowSide / 2.0f, -arrowSide / 2.0f)
-    };
+        };
 
         private void RenderOrientationAxis(Graphics g)
         {
@@ -956,7 +974,7 @@ namespace RelativeOverlay
                 TransitionTracker.useTeamName = intResult != 0;
 
             intResult = 0;
-                        MainForm.useStockCarRulesPlugin = false;
+            MainForm.useStockCarRulesPlugin = false;
             // Disable this option for now, it might come in handy down the line.
             //if (int.TryParse(this.config.Read("useStockCarRules"), out intResult) && intResult == 1)
             // MainForm.useStockCarRulesPlugin = true;

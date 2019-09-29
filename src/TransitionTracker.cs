@@ -99,6 +99,7 @@ namespace RelativeOverlay
             int LMP3s = 0;
             int LMGTs = 0;
             int GT3s = 0;
+            int Cups = 0;
 
             var opponentInfos = new List<OpponentTimingInfo>();
             for (int i = 0; i < scoring.mScoringInfo.mNumVehicles; ++i)
@@ -189,6 +190,10 @@ namespace RelativeOverlay
                     case "GT3":
                         GT3s++;
                         opponentInfos[i].positionInClass = GT3s;
+                        break;
+                    case "GT3 Cup":
+                        Cups++;
+                        opponentInfos[i].positionInClass = Cups;
                         break;
                     default:
                         break;
@@ -391,7 +396,10 @@ namespace RelativeOverlay
                 if (opponentInfos[i].vehicleClass == "GT3")
                     return new SolidBrush(Color.FromArgb(208, 103, 28));
 
-                return new SolidBrush(Color.FromArgb(255, 190, 110));
+                if (opponentInfos[i].vehicleClass == "GT3 Cup")
+                    return new SolidBrush(Color.FromArgb(167, 223, 80));
+
+                return new SolidBrush(Color.FromArgb(255, 255, 255));
         }
 
             if (g != null)
