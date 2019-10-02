@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -27,12 +28,13 @@ namespace RelativeOverlay
         private const int CONNECTION_RETRY_INTERVAL_MS = 1000;
         private const int DISCONNECTED_CHECK_INTERVAL_MS = 15000;
         private const float DEGREES_IN_RADIAN = 57.2957795f;
-        private const int LIGHT_MODE_REFRESH_MS = 200;
+        private const int REFRESH_MS = 200;
 
         System.Windows.Forms.Timer connectTimer = new System.Windows.Forms.Timer();
         System.Windows.Forms.Timer disconnectTimer = new System.Windows.Forms.Timer();
         bool connected = false;
         bool hidden = false;
+        bool autoHide = false;
 
         private class MappedBuffer<MappedBufferT>
         {
@@ -404,8 +406,7 @@ namespace RelativeOverlay
                         this.MainRender();
                     }
 
-                    //if (this.logLightMode)
-                    Thread.Sleep(LIGHT_MODE_REFRESH_MS);
+                    Thread.Sleep(REFRESH_MS);
                 }
                 catch (Exception)
                 {
@@ -420,17 +421,20 @@ namespace RelativeOverlay
 
         void MainUpdate()
         {
-            if (scoring.mScoringInfo.mInRealtime == 0 && !hidden)
+            if (autoHide)
             {
-                this.Location = new Point(this.Location.X, this.Location.Y - 10000);
-                hidden = true;
+                if (scoring.mScoringInfo.mInRealtime == 0 && !hidden)
+                {
+                    this.Location = new Point(this.Location.X, this.Location.Y - 10000);
+                    hidden = true;
 
-                return;
-            }
-            else if (scoring.mScoringInfo.mInRealtime == 1 && hidden)
-            {
-                this.Location = new Point(this.Location.X, this.Location.Y + 10000);
-                hidden = false;
+                    return;
+                }
+                else if (scoring.mScoringInfo.mInRealtime == 1 && hidden)
+                {
+                    this.Location = new Point(this.Location.X, this.Location.Y + 10000);
+                    hidden = false;
+                }
             }
 
             if (!this.connected)
@@ -922,64 +926,72 @@ namespace RelativeOverlay
             this.connected = false;
         }
 
+        bool InRange(int numberToCheck, int min, int max)
+        {
+            return (numberToCheck >= min && numberToCheck <= max);
+        }
+
         void LoadConfig()
         {
-            float result = 0.0f;
-
-            int posX = 0;
-            int posY = 0;
-            if (int.TryParse(this.config.Read("posX"), out posX) && int.TryParse(this.config.Read("posY"), out posY))
+            if (int.TryParse(this.config.Read("posX"), out int posX) && int.TryParse(this.config.Read("posY"), out int posY))
                 this.Location = new Point(posX, posY);
 
-            this.scale = 2.0f;
-            if (float.TryParse(this.config.Read("scale"), out result))
-                this.scale = result;
+            if (int.TryParse(this.config.Read("autoHide"), out int intResult))
+                this.autoHide = Convert.ToBoolean(intResult);
 
-            if (this.scale <= 0.0f)
-                this.scale = 0.1f;
+            if (int.TryParse(this.config.Read("useTeamNames"), out intResult) && InRange(intResult, 0, 1))
+                TransitionTracker.useTeamName = Convert.ToBoolean(intResult);
 
-            result = 0.0f;
-            this.xOffset = 0.0f;
-            if (float.TryParse(this.config.Read("xOffset"), out result))
-                this.xOffset = result;
+            if (int.TryParse(this.config.Read("pitAlpha"), out intResult) && InRange(intResult, 0, 255))
+                TransitionTracker.pitAlpha = intResult;
 
-            result = 0.0f;
-            this.yOffset = 0.0f;
-            if (float.TryParse(this.config.Read("yOffset"), out result))
-                this.yOffset = result;
 
-            int intResult = 0;
-            this.focusVehicle = 0;
-            if (int.TryParse(this.config.Read("focusVehicle"), out intResult) && intResult >= 0)
-                this.focusVehicle = intResult;
 
-            intResult = 0;
-            this.rotateAroundVehicle = false;
-            if (int.TryParse(this.config.Read("rotateAroundVehicle"), out intResult) && intResult == 0)
-                this.rotateAroundVehicle = false;
+            if (int.TryParse(this.config.Read("fontSize"), out intResult))
+                TransitionTracker.fontSize = intResult;
 
-            intResult = 0;
-            this.logLightMode = false;
-            if (int.TryParse(this.config.Read("logLightMode"), out intResult) && intResult == 1)
-                this.logLightMode = false;
+            TransitionTracker.fontName = this.config.Read("fontName");
 
-            intResult = 0;
-            this.logTiming = false;
-            if (int.TryParse(this.config.Read("logTiming"), out intResult) && intResult == 0)
-                this.logTiming = false;
 
-            intResult = 0;
-            TransitionTracker.useTeamName = false;
-            if (int.TryParse(this.config.Read("useTeamNames"), out intResult) && intResult == 1)
-                TransitionTracker.useTeamName = intResult != 0;
+            
+            if (this.config.Read("GTR").Length == 6)
+                TransitionTracker.GTRColor = "#" + this.config.Read("GTR");
 
-            intResult = 0;
+            if (this.config.Read("LMP1").Length == 6)
+                TransitionTracker.LMP1Color = "#" + this.config.Read("LMP1");
+
+            if (this.config.Read("LMP2").Length == 6)
+                TransitionTracker.LMP2Color = "#" + this.config.Read("LMP2");
+
+            if (this.config.Read("LMP3").Length == 6)
+                TransitionTracker.LMP3Color = "#" + this.config.Read("LMP3");
+
+            if (this.config.Read("GTE").Length == 6)
+                TransitionTracker.GTEColor = "#" + this.config.Read("GTE");
+
+            if (this.config.Read("GT3").Length == 6)
+                TransitionTracker.GT3Color = "#" + this.config.Read("GT3");
+
+            if (this.config.Read("CUP").Length == 6)
+                TransitionTracker.CUPColor = "#" + this.config.Read("CUP");
+
+
+
+            if (this.config.Read("Player").Length == 6)
+                TransitionTracker.PlayerColor = "#" + this.config.Read("player");
+
+            if (this.config.Read("Normal").Length == 6)
+                TransitionTracker.NormalColor = "#" + this.config.Read("normal");
+
+            if (this.config.Read("Faster").Length == 6)
+                TransitionTracker.FasterCarColor = "#" + this.config.Read("faster");
+
+            if (this.config.Read("Slower").Length == 6)
+                TransitionTracker.SlowerCarColor = "#" + this.config.Read("slower");
+
+
+
             MainForm.useStockCarRulesPlugin = false;
-            // Disable this option for now, it might come in handy down the line.
-            //if (int.TryParse(this.config.Read("useStockCarRules"), out intResult) && intResult == 1)
-            // MainForm.useStockCarRulesPlugin = true;
-
-            //this.checkBoxStockCarRules.Checked = MainForm.useStockCarRulesPlugin;
         }
 
         public const int WM_NCLBUTTONDOWN = 0xA1;

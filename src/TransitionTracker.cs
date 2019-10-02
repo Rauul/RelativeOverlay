@@ -8,13 +8,36 @@ using RelativeOverlay.rFactor2Data;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 
 namespace RelativeOverlay
 {
     internal class TransitionTracker
     {
+        public static int fontSize = 13;
+        public static string fontName = "Ubuntu Mono";
+
+        public static string LMP1Color = "#db5858";
+        public static string LMP2Color = "#2d8ce6";
+        public static string LMP3Color = "#c864dc";
+        public static string GTRColor = "#f24d4d";
+        public static string GTEColor = "#2fb454";
+        public static string GT3Color = "#d26f31";
+        public static string CUPColor = "#aadc50";
+
+        public static string PlayerColor = "#d7a01e";
+        public static string NormalColor = "#c8c8c8";
+        public static string FasterCarColor = "#e66969";
+        public static string SlowerCarColor = "#69a1e6";
+        public static int pitAlpha = 128;
+
         public static bool useTeamName = false;
+
+        static T Max<T>(params T[] numberItems)
+        {
+            return numberItems.Max();
+        }
 
         internal TransitionTracker()
         {
@@ -308,99 +331,93 @@ namespace RelativeOverlay
                 opponentInfos.RemoveRange(gridSize * 2 + 1, opponentInfos.Count - (gridSize * 2 + 1));
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
-            var PlayerInPitsBrush = new SolidBrush(Color.FromArgb(170, 130, 25));
-            var PlayerOnTrackBrush = new SolidBrush(Color.FromArgb(215, 160, 30));
-            var EqualCarInPitsBrush = new SolidBrush(Color.FromArgb(128, 128, 128));
-            var EqualCarOnTrackBrush = new SolidBrush(Color.FromArgb(230, 230, 230));
-            var FasterCarInPitsBrush = new SolidBrush(Color.FromArgb(179, 59, 59));
-            var FasterCarOnTrackBrush = new SolidBrush(Color.FromArgb(230, 79, 79));
-            var SlowerCarInPitsBrush = new SolidBrush(Color.FromArgb(59, 137, 179));
-            var SlowerCarOnTrackBrush = new SolidBrush(Color.FromArgb(75, 175, 230));
+
+
             var session = scoring.mScoringInfo.mSession;
 
             Brush TextColor(int other, int player)
             {
-                // if it's us, we want player text colors
+                // if it's us, we want player color
                 if (opponentInfos[other].isPlayer)
                 {
                     if (opponentInfos[other].inPits)
-                        return PlayerInPitsBrush;
-                    return PlayerOnTrackBrush;
+                        return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(PlayerColor)));
+                    return new SolidBrush(ColorTranslator.FromHtml(PlayerColor));
                 }
 
                 if (session > 9)
                 {
-                    // somthings up at the start of a race so lock to equal car colors
-                    if (opponentInfos[player].currLap < 0)
+                    // somthings up at the start of a race so lock to normal color
+                    if (opponentInfos[player].currLap < 1)
                     {
                         if (opponentInfos[other].inPits)
-                            return EqualCarInPitsBrush;
-                        return EqualCarOnTrackBrush;
+                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(NormalColor)));
+                        return new SolidBrush(ColorTranslator.FromHtml(NormalColor));
                     }
 
-                    // if a faster car is >.5 lap ahead of us, we want faster car colors
+                    // if a faster car is >.5 lap ahead of us, we want faster car color
                     if ((opponentInfos[other].position < opponentInfos[player].position && opponentInfos[other].relativeTime > 0) ||
                         (opponentInfos[other].position < opponentInfos[player].position && opponentInfos[other].totalLapDistance > opponentInfos[player].totalLapDistance + 1))
                     {
                         if (opponentInfos[other].inPits)
-                            return FasterCarInPitsBrush;
-                        return FasterCarOnTrackBrush;
+                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(FasterCarColor)));
+                        return new SolidBrush(ColorTranslator.FromHtml(FasterCarColor));
                     }
 
-                    // else if a slower car is >.5 lap behind us, we want slower car colors
+                    // else if a slower car is >.5 lap behind us, we want slower car color
                     else if ((opponentInfos[other].position > opponentInfos[player].position && opponentInfos[other].relativeTime < 0) ||
                         (opponentInfos[other].position > opponentInfos[player].position && opponentInfos[other].totalLapDistance < opponentInfos[player].totalLapDistance - 1))
                     {
                         if (opponentInfos[other].inPits)
-                            return SlowerCarInPitsBrush;
-                        return SlowerCarOnTrackBrush;
+                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(SlowerCarColor)));
+                        return new SolidBrush(ColorTranslator.FromHtml(SlowerCarColor));
                     }
 
-                    // else we fight for position and want equal car colors
+                    // else we fight for position and want normal color
                     else
                     {
                         if (opponentInfos[other].inPits)
-                            return EqualCarInPitsBrush;
-                        return EqualCarOnTrackBrush;
+                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(NormalColor)));
+                        return new SolidBrush(ColorTranslator.FromHtml(NormalColor));
                     }
                 }
 
-                // if not in race we want white
+                // if not in race we want normal color
                 else
                 {
                     if (opponentInfos[other].inPits)
-                        return EqualCarInPitsBrush;
-                    return EqualCarOnTrackBrush;
+                        return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(NormalColor)));
+                    return new SolidBrush(ColorTranslator.FromHtml(NormalColor));
                 }
             }
 
-            Brush Classcolor(int i)
+            Brush ClassColor(int i)
             {
                 if (opponentInfos[i].vehicleClass == "LMHC" ||
                     opponentInfos[i].vehicleClass == "Hypercar" ||
                     opponentInfos[i].vehicleClass == "Senna GTR")
-                    return new SolidBrush(Color.FromArgb(220, 60, 60));
+                    return new SolidBrush(ColorTranslator.FromHtml(GTRColor));
 
                 if (opponentInfos[i].vehicleClass == "LMP1")
-                    return new SolidBrush(Color.FromArgb(220, 60, 60));
+                    return new SolidBrush(ColorTranslator.FromHtml(LMP1Color));
 
                 if (opponentInfos[i].vehicleClass == "LMP2")
-                    return new SolidBrush(Color.FromArgb(45, 140, 230));
+                    return new SolidBrush(ColorTranslator.FromHtml(LMP2Color));
 
                 if (opponentInfos[i].vehicleClass == "LMP3")
-                    return new SolidBrush(Color.FromArgb(200, 100, 220));
+                    return new SolidBrush(ColorTranslator.FromHtml(LMP3Color));
 
                 if (opponentInfos[i].vehicleClass == "GTE")
-                    return new SolidBrush(Color.FromArgb(35, 180, 75));
+                    return new SolidBrush(ColorTranslator.FromHtml(GTEColor));
 
                 if (opponentInfos[i].vehicleClass == "GT3")
-                    return new SolidBrush(Color.FromArgb(208, 103, 28));
+                    return new SolidBrush(ColorTranslator.FromHtml(GT3Color));
 
                 if (opponentInfos[i].vehicleClass == "GT3 Cup")
-                    return new SolidBrush(Color.FromArgb(167, 223, 80));
+                    return new SolidBrush(ColorTranslator.FromHtml(CUPColor));
 
                 return new SolidBrush(Color.FromArgb(255, 255, 255));
-        }
+            }
 
             if (g != null)
             {
@@ -416,23 +433,30 @@ namespace RelativeOverlay
                 var point = new Point(25, 5);
                 var rAlinged = new StringFormat() { Alignment = StringAlignment.Far };
                 var lAlinged = new StringFormat() { Alignment = StringAlignment.Near };
-                var font = new Font("Ubuntu Mono", 13, FontStyle.Bold);
+                var font = new Font(fontName, fontSize, FontStyle.Bold);
+                bool isMultiClass = (Max(GTRs, LMP1s, LMP2s, LMP3s, LMGTs, GT3s, Cups) < scoring.mScoringInfo.mNumVehicles);
 
                 int i = 0;
                 foreach (var o in opponentInfos)
                 {
                     var brush = TextColor(i, playerSlot);
                     g.DrawString(o.position.ToString(), font, brush, point, rAlinged);
-                    point.X += 5;
-                    g.FillRectangle(Classcolor(i), point.X, point.Y+1, 25, 18);
-                    point.X += 25;
-                    g.DrawString(o.positionInClass.ToString(), font, Brushes.Black, point, rAlinged);
-                    point.X += 5;
+                    point.X += isMultiClass ? 5 : 10;
+
+                    if (isMultiClass)
+                    {
+                        g.FillRectangle(ClassColor(i), point.X, point.Y + 1, 25, 18);
+                        point.X += 25;
+                        g.DrawString(o.positionInClass.ToString(), font, Brushes.Black, point, rAlinged);
+                        point.X += 5;
+                    }
+
                     if (useTeamName)
                         g.DrawString(o.vehicleName, font, brush, point, lAlinged);
                     else
                         g.DrawString(o.name, font, brush, point, lAlinged);
-                    point.X += 335;
+
+                    point.X += isMultiClass ? 335 : 360;
                     g.DrawString((o.relativeTime * -1).ToString("0.0"), font, brush, point, rAlinged);
 
                     point.X = 25;
