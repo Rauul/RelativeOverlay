@@ -47,6 +47,7 @@ namespace FuelOverlay
         System.Windows.Forms.Timer connectTimer = new System.Windows.Forms.Timer();
         System.Windows.Forms.Timer disconnectTimer = new System.Windows.Forms.Timer();
         bool connected = false;
+        bool autoHide = false;
 
         private class MappedBuffer<MappedBufferT>
         {
@@ -425,17 +426,20 @@ namespace FuelOverlay
 
         void MainUpdate()
         {
-            if (scoring.mScoringInfo.mInRealtime == 0 && !hidden)
+            if (autoHide)
             {
-                this.Location = new Point(this.Location.X, this.Location.Y - 10000);
-                hidden = true;
+                if (scoring.mScoringInfo.mInRealtime == 0 && !hidden)
+                {
+                    this.Location = new Point(this.Location.X, this.Location.Y - 10000);
+                    hidden = true;
 
-                return;
-            }
-            else if (scoring.mScoringInfo.mInRealtime == 1 && hidden)
-            {
-                this.Location = new Point(this.Location.X, this.Location.Y + 10000);
-                hidden = false;
+                    return;
+                }
+                else if (scoring.mScoringInfo.mInRealtime == 1 && hidden)
+                {
+                    this.Location = new Point(this.Location.X, this.Location.Y + 10000);
+                    hidden = false;
+                }
             }
 
             if (scoring.mScoringInfo.mInRealtime == 0)
@@ -1060,8 +1064,12 @@ namespace FuelOverlay
 
             int posX = 0;
             int posY = 0;
+            int intResult = 0;
             if (int.TryParse(this.config.Read("posX"), out posX) && int.TryParse(this.config.Read("posY"), out posY))
                 this.Location = new Point(posX, posY);
+
+            if (int.TryParse(this.config.Read("autoHide"), out intResult))
+                this.autoHide = Convert.ToBoolean(intResult);
 
             this.scale = 2.0f;
             if (float.TryParse(this.config.Read("scale"), out result))
@@ -1080,7 +1088,7 @@ namespace FuelOverlay
             if (float.TryParse(this.config.Read("yOffset"), out result))
                 this.yOffset = result;
 
-            int intResult = 0;
+            intResult = 0;
             this.focusVehicle = 0;
             if (int.TryParse(this.config.Read("focusVehicle"), out intResult) && intResult >= 0)
                 this.focusVehicle = intResult;
