@@ -24,6 +24,21 @@ namespace RelativeOverlay
 {
     public partial class MainForm : Form
     {
+        protected override bool ShowWithoutActivation { get { return true; } }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                //make sure Top Most property on form is set to false
+                //otherwise this doesn't work
+                int WS_EX_TOPMOST = 0x00000008;
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= WS_EX_TOPMOST;
+                return cp;
+            }
+        }
+
         // Connection fields
         private const int CONNECTION_RETRY_INTERVAL_MS = 1000;
         private const int DISCONNECTED_CHECK_INTERVAL_MS = 15000;
@@ -357,9 +372,7 @@ namespace RelativeOverlay
             this.disconnectTimer.Start();
 
             this.view.Paint += View_Paint;
-
-            this.TopMost = true;
-
+            
             Application.Idle += HandleApplicationIdle;
         }
 
@@ -974,6 +987,9 @@ namespace RelativeOverlay
 
             if (this.config.Read("CUP").Length == 6)
                 TransitionTracker.CUPColor = "#" + this.config.Read("CUP");
+
+            if (this.config.Read("Other").Length == 6)
+                TransitionTracker.OtherColor = "#" + this.config.Read("Other");
 
 
 

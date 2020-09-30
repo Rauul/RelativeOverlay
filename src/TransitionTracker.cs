@@ -15,7 +15,7 @@ namespace RelativeOverlay
 {
     internal class TransitionTracker
     {
-        public static int fontSize = 13;
+        public static int fontSize = 14;
         public static string fontName = "Ubuntu Mono";
 
         public static string LMP1Color = "#db5858";
@@ -25,6 +25,7 @@ namespace RelativeOverlay
         public static string GTEColor = "#2fb454";
         public static string GT3Color = "#d26f31";
         public static string CUPColor = "#aadc50";
+        public static string OtherColor = "#000000";
 
         public static string PlayerColor = "#d7a01e";
         public static string NormalColor = "#c8c8c8";
@@ -123,6 +124,7 @@ namespace RelativeOverlay
             int LMGTs = 0;
             int GT3s = 0;
             int Cups = 0;
+            int Others = 0;
 
             var opponentInfos = new List<OpponentTimingInfo>();
             for (int i = 0; i < scoring.mScoringInfo.mNumVehicles; ++i)
@@ -219,6 +221,8 @@ namespace RelativeOverlay
                         opponentInfos[i].positionInClass = Cups;
                         break;
                     default:
+                        Others++;
+                        opponentInfos[i].positionInClass = Others;
                         break;
                 }
             }
@@ -416,7 +420,8 @@ namespace RelativeOverlay
                 if (opponentInfos[i].vehicleClass == "GT3 Cup")
                     return new SolidBrush(ColorTranslator.FromHtml(CUPColor));
 
-                return new SolidBrush(Color.FromArgb(255, 255, 255));
+                return new SolidBrush(ColorTranslator.FromHtml(OtherColor));
+                //return new SolidBrush(Color.FromArgb(255, 255, 255));
             }
 
             if (g != null)
@@ -434,7 +439,7 @@ namespace RelativeOverlay
                 var rAlinged = new StringFormat() { Alignment = StringAlignment.Far };
                 var lAlinged = new StringFormat() { Alignment = StringAlignment.Near };
                 var font = new Font(fontName, fontSize, FontStyle.Bold);
-                bool isMultiClass = (Max(GTRs, LMP1s, LMP2s, LMP3s, LMGTs, GT3s, Cups) < scoring.mScoringInfo.mNumVehicles);
+                bool isMultiClass = (Max(GTRs, LMP1s, LMP2s, LMP3s, LMGTs, GT3s, Cups, Others) < scoring.mScoringInfo.mNumVehicles);
 
                 int i = 0;
                 foreach (var o in opponentInfos)

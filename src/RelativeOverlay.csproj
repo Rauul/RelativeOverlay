@@ -117,6 +117,7 @@
   <ItemGroup>
     <Content Include="Cool.ico" />
     <Content Include="icon.ico" />
+    <Content Include="icon2.ico" />
     <Content Include="TextTemplate.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
