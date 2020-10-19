@@ -127,6 +127,50 @@ namespace RelativeOverlay
             int Others = 0;
 
             var opponentInfos = new List<OpponentTimingInfo>();
+
+
+
+            // Time left
+            var tFont = new Font("Ubuntu", 16, FontStyle.Bold);
+            var tBrush = new SolidBrush(ColorTranslator.FromHtml(NormalColor));
+            var tPoint = new Point(200, 0);
+            var cAlinged = new StringFormat() { Alignment = StringAlignment.Center };
+
+            if (scoring.mScoringInfo.mMaxLaps > 99999)
+            {
+                int totalSecondsLeft = (int)(scoring.mScoringInfo.mEndET - scoring.mScoringInfo.mCurrentET);
+                int minutesLeft = totalSecondsLeft / 60;
+                int secondsLeft = totalSecondsLeft % 60;
+                if (totalSecondsLeft < 0)
+                    minutesLeft = secondsLeft = 0;
+                string timeLeft = minutesLeft.ToString("0") + ":" + secondsLeft.ToString("00");
+
+                g.DrawString(timeLeft, tFont, tBrush, tPoint, cAlinged);
+            }
+            // Laps
+            else
+            {
+                for (int i = 0; i < scoring.mScoringInfo.mNumVehicles; ++i)
+                {
+                    if (scoring.mVehicles[i].mIsPlayer == 1)
+                    {
+                        playerSlot = i;
+                        break;
+                    }
+                }
+
+                if (playerSlot < 0)
+                    return;
+                int leadLaps = scoring.mVehicles[playerSlot].mTotalLaps + 1;
+                int maxLaps = scoring.mScoringInfo.mMaxLaps;
+                if (leadLaps > maxLaps)
+                    leadLaps = maxLaps;
+                string laps = leadLaps + " / " + maxLaps;
+
+                g.DrawString(laps, tFont, tBrush, tPoint, cAlinged);
+            }
+
+
             for (int i = 0; i < scoring.mScoringInfo.mNumVehicles; ++i)
             {
                 var veh = scoring.mVehicles[i];
@@ -421,7 +465,6 @@ namespace RelativeOverlay
                     return new SolidBrush(ColorTranslator.FromHtml(CUPColor));
 
                 return new SolidBrush(ColorTranslator.FromHtml(OtherColor));
-                //return new SolidBrush(Color.FromArgb(255, 255, 255));
             }
 
             if (g != null)
@@ -435,7 +478,7 @@ namespace RelativeOverlay
                     }
                 }
 
-                var point = new Point(25, 5);
+                var point = new Point(25, 30);
                 var rAlinged = new StringFormat() { Alignment = StringAlignment.Far };
                 var lAlinged = new StringFormat() { Alignment = StringAlignment.Near };
                 var font = new Font(fontName, fontSize, FontStyle.Bold);
@@ -462,6 +505,7 @@ namespace RelativeOverlay
                         g.DrawString(o.name, font, brush, point, lAlinged);
 
                     point.X += isMultiClass ? 335 : 360;
+
                     g.DrawString((o.relativeTime * -1).ToString("0.0"), font, brush, point, rAlinged);
 
                     point.X = 25;
