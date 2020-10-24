@@ -953,10 +953,10 @@ namespace RelativeOverlay
                 this.autoHide = Convert.ToBoolean(intResult);
 
             if (int.TryParse(this.config.Read("useTeamNames"), out intResult) && InRange(intResult, 0, 1))
-                TransitionTracker.useTeamName = Convert.ToBoolean(intResult);
+                TransitionTracker.UseTeamName = Convert.ToBoolean(intResult);
 
             if (int.TryParse(this.config.Read("pitAlpha"), out intResult) && InRange(intResult, 0, 255))
-                TransitionTracker.pitAlpha = intResult;
+                TransitionTracker.PitAlpha = intResult;
 
 
 
@@ -996,6 +996,9 @@ namespace RelativeOverlay
             if (this.config.Read("Player").Length == 6)
                 TransitionTracker.PlayerColor = "#" + this.config.Read("player");
 
+            if (this.config.Read("playerBackground").Length == 6)
+                TransitionTracker.PlayerBackgroundColor = "#" + this.config.Read("playerBackground");
+
             if (this.config.Read("Normal").Length == 6)
                 TransitionTracker.NormalColor = "#" + this.config.Read("normal");
 
@@ -1004,6 +1007,11 @@ namespace RelativeOverlay
 
             if (this.config.Read("Slower").Length == 6)
                 TransitionTracker.SlowerCarColor = "#" + this.config.Read("slower");
+
+
+
+            if (int.TryParse(this.config.Read("showLapTimeSeconds"), out intResult) && InRange(intResult, 0, 255))
+                TransitionTracker.ShowLapTimeSeconds = intResult;
 
 
 

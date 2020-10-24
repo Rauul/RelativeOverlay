@@ -15,25 +15,27 @@ namespace RelativeOverlay
 {
     internal class TransitionTracker
     {
-        public static int fontSize = 14;
-        public static string fontName = "Ubuntu Mono";
+        public static int fontSize = 13;
+        public static string fontName = "Courier New";
 
-        public static string LMP1Color = "#db5858";
-        public static string LMP2Color = "#2d8ce6";
-        public static string LMP3Color = "#c864dc";
-        public static string GTRColor = "#f24d4d";
-        public static string GTEColor = "#2fb454";
-        public static string GT3Color = "#d26f31";
-        public static string CUPColor = "#aadc50";
+        public static string LMP1Color  = "#db5858";
+        public static string LMP2Color  = "#2d8ce6";
+        public static string LMP3Color  = "#c864dc";
+        public static string GTRColor   = "#f24d4d";
+        public static string GTEColor   = "#2fb454";
+        public static string GT3Color   = "#d26f31";
+        public static string CUPColor   = "#aadc50";
         public static string OtherColor = "#000000";
 
         public static string PlayerColor = "#d7a01e";
+        public static string PlayerBackgroundColor = "#888888";
         public static string NormalColor = "#c8c8c8";
         public static string FasterCarColor = "#e66969";
         public static string SlowerCarColor = "#69a1e6";
-        public static int pitAlpha = 128;
+        public static int    PitAlpha = 128;
 
-        public static bool useTeamName = false;
+        public static bool UseTeamName = false;
+        public static int ShowLapTimeSeconds = 10;
 
         static T Max<T>(params T[] numberItems)
         {
@@ -135,18 +137,28 @@ namespace RelativeOverlay
             var tBrush = new SolidBrush(ColorTranslator.FromHtml(NormalColor));
             var tPoint = new Point(200, 0);
             var cAlinged = new StringFormat() { Alignment = StringAlignment.Center };
+            string timeLeft;
 
             if (scoring.mScoringInfo.mMaxLaps > 99999)
             {
-                int totalSecondsLeft = (int)(scoring.mScoringInfo.mEndET - scoring.mScoringInfo.mCurrentET);
+                int totalSecondsLeft = ((int)scoring.mScoringInfo.mEndET - (int)scoring.mScoringInfo.mCurrentET);
+                int hoursLeft = totalSecondsLeft / 3600;
+                totalSecondsLeft = totalSecondsLeft % 3600;
                 int minutesLeft = totalSecondsLeft / 60;
                 int secondsLeft = totalSecondsLeft % 60;
                 if (totalSecondsLeft < 0)
-                    minutesLeft = secondsLeft = 0;
-                string timeLeft = minutesLeft.ToString("0") + ":" + secondsLeft.ToString("00");
+                    hoursLeft = minutesLeft = secondsLeft = 0;
+
+                if (hoursLeft > 200)
+                    timeLeft = "";
+                else if (hoursLeft < 1)
+                    timeLeft = minutesLeft.ToString("0") + ":" + secondsLeft.ToString("00");
+                else
+                    timeLeft = hoursLeft.ToString("0") + ":" + minutesLeft.ToString("00") + ":" + secondsLeft.ToString("00");
 
                 g.DrawString(timeLeft, tFont, tBrush, tPoint, cAlinged);
-            }
+            }            
+
             // Laps
             else
             {
@@ -389,7 +401,7 @@ namespace RelativeOverlay
                 if (opponentInfos[other].isPlayer)
                 {
                     if (opponentInfos[other].inPits)
-                        return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(PlayerColor)));
+                        return new SolidBrush(Color.FromArgb(PitAlpha, ColorTranslator.FromHtml(PlayerColor)));
                     return new SolidBrush(ColorTranslator.FromHtml(PlayerColor));
                 }
 
@@ -399,7 +411,7 @@ namespace RelativeOverlay
                     if (opponentInfos[player].currLap < 1)
                     {
                         if (opponentInfos[other].inPits)
-                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(NormalColor)));
+                            return new SolidBrush(Color.FromArgb(PitAlpha, ColorTranslator.FromHtml(NormalColor)));
                         return new SolidBrush(ColorTranslator.FromHtml(NormalColor));
                     }
 
@@ -408,7 +420,7 @@ namespace RelativeOverlay
                         (opponentInfos[other].position < opponentInfos[player].position && opponentInfos[other].totalLapDistance > opponentInfos[player].totalLapDistance + 1))
                     {
                         if (opponentInfos[other].inPits)
-                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(FasterCarColor)));
+                            return new SolidBrush(Color.FromArgb(PitAlpha, ColorTranslator.FromHtml(FasterCarColor)));
                         return new SolidBrush(ColorTranslator.FromHtml(FasterCarColor));
                     }
 
@@ -417,7 +429,7 @@ namespace RelativeOverlay
                         (opponentInfos[other].position > opponentInfos[player].position && opponentInfos[other].totalLapDistance < opponentInfos[player].totalLapDistance - 1))
                     {
                         if (opponentInfos[other].inPits)
-                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(SlowerCarColor)));
+                            return new SolidBrush(Color.FromArgb(PitAlpha, ColorTranslator.FromHtml(SlowerCarColor)));
                         return new SolidBrush(ColorTranslator.FromHtml(SlowerCarColor));
                     }
 
@@ -425,7 +437,7 @@ namespace RelativeOverlay
                     else
                     {
                         if (opponentInfos[other].inPits)
-                            return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(NormalColor)));
+                            return new SolidBrush(Color.FromArgb(PitAlpha, ColorTranslator.FromHtml(NormalColor)));
                         return new SolidBrush(ColorTranslator.FromHtml(NormalColor));
                     }
                 }
@@ -434,7 +446,7 @@ namespace RelativeOverlay
                 else
                 {
                     if (opponentInfos[other].inPits)
-                        return new SolidBrush(Color.FromArgb(pitAlpha, ColorTranslator.FromHtml(NormalColor)));
+                        return new SolidBrush(Color.FromArgb(PitAlpha, ColorTranslator.FromHtml(NormalColor)));
                     return new SolidBrush(ColorTranslator.FromHtml(NormalColor));
                 }
             }
@@ -487,6 +499,9 @@ namespace RelativeOverlay
                 int i = 0;
                 foreach (var o in opponentInfos)
                 {
+                    if (i == playerSlot)
+                        g.FillRectangle(new SolidBrush(ColorTranslator.FromHtml(PlayerBackgroundColor)), 2, point.Y, 396, 18);
+
                     var brush = TextColor(i, playerSlot);
                     g.DrawString(o.position.ToString(), font, brush, point, rAlinged);
                     point.X += isMultiClass ? 5 : 10;
@@ -499,17 +514,24 @@ namespace RelativeOverlay
                         point.X += 5;
                     }
 
-                    if (useTeamName)
+                    if (UseTeamName)
                         g.DrawString(o.vehicleName, font, brush, point, lAlinged);
                     else
                         g.DrawString(o.name, font, brush, point, lAlinged);
 
                     point.X += isMultiClass ? 335 : 360;
 
-                    g.DrawString((o.relativeTime * -1).ToString("0.0"), font, brush, point, rAlinged);
+                    if (o.timeIntoLap < ShowLapTimeSeconds && o.lastLapTime > 0)
+                    {
+                        string lastLapMinutes = ((int)o.lastLapTime / 60).ToString() + ":";
+
+                        g.DrawString(lastLapMinutes + (o.lastLapTime % 60).ToString("00.000"), font, brush, point, rAlinged);
+                    }
+                    else
+                        g.DrawString((o.relativeTime * -1).ToString("0.0"), font, brush, point, rAlinged);
 
                     point.X = 25;
-                    point.Y += 20;
+                    point.Y += 22;
                     i++;
                 }
             }
