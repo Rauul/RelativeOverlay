@@ -503,6 +503,9 @@ namespace FuelOverlay
 
         void MainRender()
         {
+            if (scoring.mScoringInfo.mNumVehicles < 0 || getPlayerSlot() == -1)
+                return;
+
             // Telemetry
             int playerSlot = getPlayerSlot();
 
